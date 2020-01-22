@@ -1,7 +1,9 @@
 package codegen
 
 import (
+	// "reflect"
 	"sort"
+    "fmt"
 	"strings"
 
 	"github.com/sanity-io/litter"
@@ -203,6 +205,8 @@ type ArrayType struct {
 
 func (ArrayType) IsNillable() bool { return true }
 
+func (a ArrayType) GetItem() Type { return a.Type }
+
 func (a ArrayType) Generate(out *Emitter) {
 	out.Print("[]")
 	a.Type.Generate(out)
@@ -314,11 +318,30 @@ type StructField struct {
 	DefaultValue interface{}
 }
 
+func (f *StructField) GetDefaultValue() string {
+	if _, ok := f.Type.(*ArrayType); ok {
+		thisItem := f.Type.(*ArrayType).GetItem()
+        if _, ok := thisItem.(*NamedType); ok {
+            return fmt.Sprintf("[]%s{}", thisItem.(*NamedType).GetName())
+        }
+        if _, ok := thisItem.(PrimitiveType); ok {
+            return fmt.Sprintf("[]%s{}", thisItem.(PrimitiveType).Type)
+        }
+        // TODO: add array of arrays (kw)
+	}
+    return litter.Sdump(f.DefaultValue)
+}
+
+func (f StructField) IsNillable() bool {
+	return false
+}
+
+
 func (f *StructField) GetName() string {
 	return f.Name
 }
 
-func (f *StructField) Generate(out *Emitter) {
+func (f StructField) Generate(out *Emitter) {
 	out.Comment(f.Comment)
 	out.Print("%s ", f.Name)
 	f.Type.Generate(out)

@@ -9,8 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"unicode"
-
-	"github.com/sanity-io/litter"
+    // "github.com/kr/pretty"
 
 	"github.com/atombender/go-jsonschema/pkg/codegen"
 	"github.com/atombender/go-jsonschema/pkg/schemas"
@@ -423,7 +422,7 @@ func (g *schemaGenerator) generateDeclaredType(
 				validators = append(validators, &defaultValidator{
 					jsonName:     f.JSONName,
 					fieldName:    f.Name,
-					defaultValue: litter.Sdump(f.DefaultValue),
+					defaultValue: f.GetDefaultValue(),
 				})
 			}
 			if _, ok := f.Type.(codegen.NullType); ok {
@@ -600,6 +599,7 @@ func (g *schemaGenerator) generateStructType(
 		if err != nil {
 			return nil, fmt.Errorf("could not generate type for field %q: %s", name, err)
 		}
+        // pretty.Println(structField.Type.Type)
 
 		if prop.Default != nil {
 			structField.DefaultValue = prop.Default
@@ -646,6 +646,7 @@ func (g *schemaGenerator) generateTypeInline(
 			} else {
 				var err error
 				theType, err = g.generateTypeInline(t.Items, scope.add("Elem"))
+                // pretty.Println(theType.Decl.Name)
 				if err != nil {
 					return nil, err
 				}
