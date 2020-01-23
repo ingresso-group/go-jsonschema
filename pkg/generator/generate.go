@@ -11,8 +11,8 @@ import (
 	"unicode"
     // "github.com/kr/pretty"
 
-	"github.com/atombender/go-jsonschema/pkg/codegen"
-	"github.com/atombender/go-jsonschema/pkg/schemas"
+	"github.com/ingresso-group/go-jsonschema/pkg/codegen"
+	"github.com/ingresso-group/go-jsonschema/pkg/schemas"
 )
 
 type Config struct {
