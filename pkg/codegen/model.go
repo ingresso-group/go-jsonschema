@@ -205,7 +205,19 @@ type ArrayType struct {
 
 func (ArrayType) IsNillable() bool { return true }
 
-func (a ArrayType) GetItem() Type { return a.Type }
+// Retrieve default value for array types.
+func (a ArrayType) GetDefaultValue() string {
+    if _, ok := a.Type.(*NamedType); ok {
+        return fmt.Sprintf("[]%s{}", a.Type.(*NamedType).GetName())
+    }
+    if _, ok := a.Type.(*ArrayType); ok {
+        return fmt.Sprintf("[]%s", a.Type.(*ArrayType).GetDefaultValue())
+    }
+    if _, ok := a.Type.(PrimitiveType); ok {
+        return fmt.Sprintf("[]%s{}", a.Type.(PrimitiveType).Type)
+    }
+    return "[]interface{}{}"
+}
 
 func (a ArrayType) Generate(out *Emitter) {
 	out.Print("[]")
@@ -318,16 +330,10 @@ type StructField struct {
 	DefaultValue interface{}
 }
 
+// Retrieve default value for struct types.
 func (f *StructField) GetDefaultValue() string {
 	if _, ok := f.Type.(*ArrayType); ok {
-		thisItem := f.Type.(*ArrayType).GetItem()
-        if _, ok := thisItem.(*NamedType); ok {
-            return fmt.Sprintf("[]%s{}", thisItem.(*NamedType).GetName())
-        }
-        if _, ok := thisItem.(PrimitiveType); ok {
-            return fmt.Sprintf("[]%s{}", thisItem.(PrimitiveType).Type)
-        }
-        // TODO: add array of arrays (kw)
+		return f.Type.(*ArrayType).GetDefaultValue()
 	}
     return litter.Sdump(f.DefaultValue)
 }
