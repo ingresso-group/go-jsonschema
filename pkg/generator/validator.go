@@ -94,7 +94,7 @@ type defaultValidator struct {
 func (v *defaultValidator) generate(out *codegen.Emitter) {
 	out.Println(`if v, ok := %s["%s"]; !ok || v == nil {`, varNameRawMap, v.jsonName)
 	out.Indent(1)
-	out.Println(`%s["%s"] = %s`, varNameRawMap, v.fieldName, v.defaultValue)
+	out.Println(`%s["%s"] = %s`, varNameRawMap, v.jsonName, v.defaultValue)
 	out.Indent(-1)
 	out.Println("}")
 }
