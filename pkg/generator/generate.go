@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"unicode"
-    // "github.com/kr/pretty"
+	// "github.com/kr/pretty"
 
 	"github.com/ingresso-group/go-jsonschema/pkg/codegen"
 	"github.com/ingresso-group/go-jsonschema/pkg/schemas"
@@ -461,6 +461,7 @@ func (g *schemaGenerator) generateDeclaredType(
 			}
 
 			g.output.file.Package.AddImport("encoding/json", "")
+			g.output.file.Package.AddImport("github.com/mitchellh/mapstructure", "")
 			g.output.file.Package.AddDecl(&codegen.Method{
 				Impl: func(out *codegen.Emitter) {
 					out.Comment("UnmarshalJSON implements json.Unmarshaler.")
@@ -475,10 +476,9 @@ func (g *schemaGenerator) generateDeclaredType(
 						}
 					}
 
-					out.Println("type Plain %s", decl.Name)
-					out.Println("var %s Plain", varNamePlainStruct)
-					out.Println("if err := json.Unmarshal(b, &%s); err != nil { return err }",
-						varNamePlainStruct)
+					out.Println("if err := mapstructure.Decode(&%s, j); err != nil { return err }",
+						varNameRawMap,
+					)
 
 					for _, v := range validators {
 						if !v.desc().beforeJSONUnmarshal {
@@ -486,7 +486,6 @@ func (g *schemaGenerator) generateDeclaredType(
 						}
 					}
 
-					out.Println("*j = %s(%s)", decl.Name, varNamePlainStruct)
 					out.Println("return nil")
 					out.Indent(-1)
 					out.Println("}")
@@ -588,9 +587,9 @@ func (g *schemaGenerator) generateStructType(
 		}
 
 		if isRequired {
-			structField.Tags = fmt.Sprintf(`json:"%s"`, name)
+			structField.Tags = fmt.Sprintf(`json:"%s" mapstructure:"%s"`, name, name)
 		} else {
-			structField.Tags = fmt.Sprintf(`json:"%s,omitempty"`, name)
+			structField.Tags = fmt.Sprintf(`json:"%s,omitempty" mapstructure:"%s"`, name, name)
 		}
 
 		if structField.Comment == "" {
@@ -603,7 +602,7 @@ func (g *schemaGenerator) generateStructType(
 		if err != nil {
 			return nil, fmt.Errorf("could not generate type for field %q: %s", name, err)
 		}
-        // pretty.Println(structField.Type.Type)
+		// pretty.Println(structField.Type.Type)
 
 		if prop.Default != nil {
 			structField.DefaultValue = prop.Default
@@ -650,7 +649,7 @@ func (g *schemaGenerator) generateTypeInline(
 			} else {
 				var err error
 				theType, err = g.generateTypeInline(t.Items, scope.add("Elem"))
-                // pretty.Println(theType.Decl.Name)
+				// pretty.Println(theType.Decl.Name)
 				if err != nil {
 					return nil, err
 				}
