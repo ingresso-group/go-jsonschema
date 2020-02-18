@@ -108,6 +108,8 @@ type Type struct {
 	Media          *Type  `json:"media,omitempty"`          // section 4.3
 	BinaryEncoding string `json:"binaryEncoding,omitempty"` // section 4.3
 
+	IsRoot                bool                   `json:"root,omitempty"` // Custom Ingresso fields
+	Tags                  []string               `json:"tags,omitempty"` // Custom Ingresso fields
 	// ExtGoCustomType is the name of a (qualified or not) custom Go type
 	// to use for the field.
 	GoJSONSchemaExtension *GoJSONSchemaExtension `json:"goJSONSchema,omitempty"`
