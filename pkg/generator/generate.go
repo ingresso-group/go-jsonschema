@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 	"unicode"
-	// "github.com/kr/pretty"
 
 	"github.com/ingresso-group/go-jsonschema/pkg/codegen"
 	"github.com/ingresso-group/go-jsonschema/pkg/schemas"
@@ -471,20 +470,12 @@ func (g *schemaGenerator) generateDeclaredType(
 					out.Println("if err := json.Unmarshal(b, &%s); err != nil { return err }",
 						varNameRawMap)
 					for _, v := range validators {
-						if v.desc().beforeJSONUnmarshal {
-							v.generate(out)
-						}
+                        v.generate(out)
 					}
 
 					out.Println("if err := mapstructure.Decode(&%s, j); err != nil { return err }",
 						varNameRawMap,
 					)
-
-					for _, v := range validators {
-						if !v.desc().beforeJSONUnmarshal {
-							v.generate(out)
-						}
-					}
 
 					out.Println("return nil")
 					out.Indent(-1)
@@ -602,7 +593,6 @@ func (g *schemaGenerator) generateStructType(
 		if err != nil {
 			return nil, fmt.Errorf("could not generate type for field %q: %s", name, err)
 		}
-		// pretty.Println(structField.Type.Type)
 
 		if prop.Default != nil {
 			structField.DefaultValue = prop.Default
@@ -649,7 +639,6 @@ func (g *schemaGenerator) generateTypeInline(
 			} else {
 				var err error
 				theType, err = g.generateTypeInline(t.Items, scope.add("Elem"))
-				// pretty.Println(theType.Decl.Name)
 				if err != nil {
 					return nil, err
 				}
